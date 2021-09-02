@@ -10,7 +10,7 @@ from opensimplex import OpenSimplex
 
 qoplots.init()
 scheme = qoplots.getScheme()
-
+rcParams['text.usetex'] = False
 ## -- Conversions
 
 def rgbToHex(rgb):
@@ -245,7 +245,7 @@ def updateRCParams(scheme):
         'lines.markersize' : markerSizes['report'],
         'figure.figsize' : (5, 3.5),
         'text.latex.preamble' : "\\usepackage{amsmath, amssymb}",
-        'text.usetex' : True,
+        'text.usetex' : False,
         'savefig.facecolor' : "white",
         'savefig.edgecolor' : 'none',
         'font.family' : 'serif'
@@ -284,6 +284,7 @@ figDPI = 300
 
 if update:
     qoplots.init(scheme = schemeName)
+    rcParams['text.usetex'] = False
     scheme = qoplots.getScheme()
     normalImage.image(themeToSVG(scheme))
     fig = plt.figure(dpi = figDPI)

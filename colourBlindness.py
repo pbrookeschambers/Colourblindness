@@ -202,12 +202,12 @@ themes = sorted([s[0].upper() + s[1:] for s in qoplots.getAvailableSchemes()])
 
 schemeName = st.sidebar.selectbox("Colour Scheme", themes, index = themes.index("Twilight"))
 
-severitySlider = st.sidebar.slider("Severity", min_value = 0, max_value = 100, value = 50, step = 1, format = "%d%%")
+severitySlider = st.sidebar.slider("Severity", min_value = 0, max_value = 100, value = 100, step = 1, format = "%d%%")
 
-protCheck = st.sidebar.checkbox("Protanopia",   value = False)
-deutCheck = st.sidebar.checkbox("Deuteranopia", value = False)
-tritCheck = st.sidebar.checkbox("Tritanopia",   value = False)
-update = st.sidebar.checkbox("Update",   value = True)
+protCheck = st.sidebar.checkbox("Protanopia",   value = True, help = "Protanopia occurs when the red cones are absent. This is a form of red-green colour blindness.")
+deutCheck = st.sidebar.checkbox("Deuteranopia", value = True, help = "Deuteranopia occurs when the green cones are absent. This is another form of red-green colour blindness.")
+tritCheck = st.sidebar.checkbox("Tritanopia",   value = True, help = "Tritanopia occurs when the short wavelength cones are absent. This is a form of blue-yellow colour blindness.")
+update    = st.sidebar.checkbox("Update",   value = True, help = "This is necessary for automatically updating the theme. Please leave checked.")
 
 st.write("## Normal")
 normalImage = st.empty()

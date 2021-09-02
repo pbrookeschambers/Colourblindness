@@ -2,6 +2,11 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import qoplots
+from cycler import cycler
+
+from matplotlib import rcParams
+
+from opensimplex import OpenSimplex
 
 qoplots.init()
 scheme = qoplots.getScheme()
@@ -198,6 +203,60 @@ def themeToSVG(theme):
     return outString
 
 
+def updateRCParams(scheme):
+    dark = False
+    colScheme = {}
+    names = ["ForegroundColour", "BackgroundColour", "Accent1", "Accent2", "Accent3", "Accent4", "Accent5", "Accent6", "Hyperlink", "FollowedHyperlink"]
+    for col, name in zip(scheme, names):
+        colScheme[name] = col if type(col) == str else rgbToHex(col)
+    linewidths = {'presentation' : 1.4, 'report' : 0.8}
+    markerSizes = {'presentation' : 4, 'report' : 6}
+    formatting = {
+        'text.color' : colScheme["ForegroundColour"],
+        'axes.labelcolor' : colScheme["ForegroundColour"],
+        'axes.edgecolor' : colScheme["ForegroundColour"],
+        'xtick.color' : colScheme["ForegroundColour"],
+        'ytick.color' : colScheme["ForegroundColour"],
+        'axes.facecolor' : colScheme["BackgroundColour"],
+        'figure.facecolor' : "white",
+        'axes.facecolor' : colScheme["BackgroundColour"],
+        'legend.edgecolor' : colScheme["ForegroundColour"],
+        'legend.facecolor' : colScheme["BackgroundColour"],
+        'axes.spines.top' : True,
+        'axes.spines.right' : True,
+        'axes.prop_cycle' : cycler(
+            'color',
+            [colScheme["Accent" + str(i)] for i in range(1, 7)] +
+            [qoplots.lighten(
+                colScheme["Accent" + str(i)],
+                0.3
+            ) for i in range(1, 7)]
+        ) if not(dark) else cycler(
+            'color',
+            [colScheme["Accent" + str(i)] for i in range(1, 7)] +
+            [qoplots.darken(
+                colScheme["Accent" + str(i)],
+                0.3
+            ) for i in range(1, 7)]
+        ),
+        'axes.linewidth' : linewidths['report'],
+        'xtick.major.width' : linewidths['report'],
+        'ytick.major.width' : linewidths['report'],
+        'lines.markersize' : markerSizes['report'],
+        'figure.figsize' : (5, 3.5),
+        'text.latex.preamble' : "\\usepackage{amsmath, amssymb}",
+        'text.usetex' : True,
+        'savefig.facecolor' : "white",
+        'savefig.edgecolor' : 'none',
+        'font.family' : 'serif'
+    }
+    for key, val in formatting.items():
+        rcParams[key] = val
+
+st.set_page_config(layout = "wide")
+
+OSNoise = OpenSimplex()
+
 themes = sorted([s[0].upper() + s[1:] for s in qoplots.getAvailableSchemes()])
 
 schemeName = st.sidebar.selectbox("Colour Scheme", themes, index = themes.index("Twilight"))
@@ -209,28 +268,97 @@ deutCheck = st.sidebar.checkbox("Deuteranopia", value = True, help = "Deuteranop
 tritCheck = st.sidebar.checkbox("Tritanopia",   value = True, help = "Tritanopia occurs when the short wavelength cones are absent. This is a form of blue-yellow colour blindness.")
 update    = st.sidebar.checkbox("Update",   value = True, help = "This is necessary for automatically updating the theme. Please leave checked.")
 
-st.write("## Normal")
-normalImage = st.empty()
+
+columns = st.columns(4)
+
+columns[0].write("## Normal")
+normalImage = columns[0].empty()
 
 normalImage.image(themeToSVG(scheme))
+
+
+x = np.linspace(0, 5, 200)
+y = [[OSNoise.noise2d(x = x[i], y = j) for i in range(len(x))] for j in range(6)]
+
+figDPI = 300
 
 if update:
     qoplots.init(scheme = schemeName)
     scheme = qoplots.getScheme()
     normalImage.image(themeToSVG(scheme))
+    fig = plt.figure(dpi = figDPI)
+    for j in range(6):
+        plt.plot(x, y[j], label = f"Accent{j+1}")
+    plt.legend()
+    plt.tick_params(
+        axis       ='both',
+        which      ='both',
+        bottom     =False,
+        top        =False,
+        left       = False,
+        right      = False,
+        labelleft  = False,
+        labelbottom=False)
+    columns[0].pyplot(fig, dpi = figDPI)
+
 
 
 if protCheck:
     protScheme = shiftScheme(scheme, 'prot', severitySlider)
-    st.write("## Protanopia")
-    protImage = st.image(themeToSVG(protScheme))
+    columns[1].write("## Protanopia")
+    protImage = columns[1].image(themeToSVG(protScheme))
+    updateRCParams(protScheme)
+    fig = plt.figure(dpi = figDPI)
+    for j in range(6):
+        plt.plot(x, y[j], label = f"Accent{j+1}")
+    plt.legend()
+    plt.tick_params(
+        axis       ='both',
+        which      ='both',
+        bottom     =False,
+        top        =False,
+        left       = False,
+        right      = False,
+        labelleft  = False,
+        labelbottom=False)
+    columns[1].pyplot(fig, dpi = figDPI)
 
 if deutCheck:
     deutScheme = shiftScheme(scheme, 'deut', severitySlider)
-    st.write("## Deuteranopia")
-    deutImage = st.image(themeToSVG(deutScheme))
+    columns[2].write("## Deuteranopia")
+    deutImage = columns[2].image(themeToSVG(deutScheme))
+    updateRCParams(deutScheme)
+    fig = plt.figure(dpi = figDPI)
+    for j in range(6):
+        plt.plot(x, y[j], label = f"Accent{j+1}")
+    plt.legend()
+    plt.tick_params(
+        axis       ='both',
+        which      ='both',
+        bottom     =False,
+        top        =False,
+        left       = False,
+        right      = False,
+        labelleft  = False,
+        labelbottom=False)
+    columns[2].pyplot(fig, dpi = figDPI)
 
 if tritCheck:
     tritScheme = shiftScheme(scheme, 'trit', severitySlider)
-    st.write("## Tritanopia")
-    tritImage = st.image(themeToSVG(tritScheme))
+    columns[3].write("## Tritanopia")
+    tritImage = columns[3].image(themeToSVG(tritScheme))
+    updateRCParams(tritScheme)
+    fig = plt.figure(dpi = figDPI)
+    for j in range(6):
+        plt.plot(x, y[j], label = f"Accent{j+1}")
+    plt.legend()
+    plt.tick_params(
+        axis       ='both',
+        which      ='both',
+        bottom     =False,
+        top        =False,
+        left       = False,
+        right      = False,
+        labelleft  = False,
+        labelbottom=False)
+    columns[3].pyplot(fig, dpi = figDPI)

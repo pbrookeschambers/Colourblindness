@@ -253,7 +253,7 @@ def updateRCParams(scheme):
     for key, val in formatting.items():
         rcParams[key] = val
 
-st.set_page_config(layout = "wide", theme = "light")
+st.set_page_config(layout = "wide")
 
 OSNoise = OpenSimplex()
 
